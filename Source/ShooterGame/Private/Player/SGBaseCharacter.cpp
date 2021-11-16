@@ -6,7 +6,12 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/Controller.h"
 #include "Components/SGCharacterMovementComponent.h"
+#include "Components/SGHealthComponent.h"
+#include "Components/TextRenderComponent.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogBaseCharacter, All, All);
 
 // Sets default values
 ASGBaseCharacter::ASGBaseCharacter(const FObjectInitializer& ObjInit)
@@ -21,12 +26,27 @@ ASGBaseCharacter::ASGBaseCharacter(const FObjectInitializer& ObjInit)
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent);
+
+    HealthComponent = CreateDefaultSubobject<USGHealthComponent>("HealthComponent");
+    check(HealthComponent);
+
+    HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
+    HealthTextComponent->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
 void ASGBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+    check(HealthComponent);
+    check(HealthTextComponent);
+    check(GetCharacterMovement());
+
+    OnHealthChanged(HealthComponent->GetHealth());
+
+    HealthComponent->OnDeath.AddUObject(this, &ASGBaseCharacter::OnDeath);
+    HealthComponent->OnHealthChanged.AddUObject(this, &ASGBaseCharacter::OnHealthChanged);
 }
 
 bool ASGBaseCharacter::IsRunning() const
@@ -51,7 +71,6 @@ float ASGBaseCharacter::GetMovementDirection() const
 void ASGBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -99,4 +118,23 @@ void ASGBaseCharacter::StartRun()
 void ASGBaseCharacter::StopRun()
 {
     WantsToRun = false;
+}
+
+void ASGBaseCharacter::OnDeath()
+{
+    UE_LOG(LogBaseCharacter, Display, TEXT("Player %s is dead"), *GetName());
+
+    PlayAnimMontage(DeathAnimMontage);
+    GetCharacterMovement()->DisableMovement();
+    SetLifeSpan(5.0f);
+
+    if (Controller)
+    {
+        Controller->ChangeState(NAME_Spectating);
+    }
+}
+
+void ASGBaseCharacter::OnHealthChanged(float Health)
+{
+    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
 }

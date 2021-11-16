@@ -8,6 +8,8 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class USGHealthComponent;
+class UTextRenderComponent;
 
 UCLASS()
 class SHOOTERGAME_API ASGBaseCharacter : public ACharacter
@@ -37,6 +39,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    USGHealthComponent* HealthComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UTextRenderComponent* HealthTextComponent;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UAnimMontage* DeathAnimMontage;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -46,6 +57,9 @@ private:
 
 	void StartRun();
     void StopRun();
+
+    void OnDeath();
+    void OnHealthChanged(float Health);
 
 private:
 	bool WantsToRun = false;
