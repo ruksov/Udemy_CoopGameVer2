@@ -2,4 +2,11 @@
 
 
 #include "SGGameModeBase.h"
+#include "Player/SGBaseCharacter.h"
+#include "Player/SGPlayerController.h"
 
+ASGGameModeBase::ASGGameModeBase()
+{
+    DefaultPawnClass = ASGBaseCharacter::StaticClass();
+    PlayerControllerClass = ASGPlayerController::StaticClass();
+}
