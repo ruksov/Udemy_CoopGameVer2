@@ -24,9 +24,14 @@ void USGHealthComponent::BeginPlay()
     }
 }
 
-void USGHealthComponent::SetHealth(float Value)
+void USGHealthComponent::SetHealth(float NewHealth)
 {
-    Health = Value;
+    if (NewHealth < Health)
+    {
+        UpdateAutoHealTimer(true);
+    }
+
+    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(Health);
 }
 
@@ -42,10 +47,46 @@ void USGHealthComponent::OnTakeAnyDamage(
         return;
     }
 
-    SetHealth(FMath::Clamp(Health - Damage, 0.0f, MaxHealth));
+    SetHealth(Health - Damage);
 
     if (IsDead())
     {
         OnDeath.Broadcast();
+        UpdateAutoHealTimer(false);
+    }
+}
+
+void USGHealthComponent::AutoHealUpdate()
+{
+    if (Health < MaxHealth)
+    {
+        SetHealth(Health + AutoHealInfo.UpdateValue);
+    }
+    else
+    {
+        UpdateAutoHealTimer(false);
+    }
+}
+
+void USGHealthComponent::UpdateAutoHealTimer(bool needActivate)
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+
+    if (needActivate && AutoHealInfo.IsEnabled)
+    {
+        World->GetTimerManager().SetTimer(AutoHealTimerHandle,
+            this,
+            &USGHealthComponent::AutoHealUpdate,
+            AutoHealInfo.UpdateTime,
+            true,
+            AutoHealInfo.StartDelay);
+    }
+    else
+    {
+        World->GetTimerManager().ClearTimer(AutoHealTimerHandle);
     }
 }

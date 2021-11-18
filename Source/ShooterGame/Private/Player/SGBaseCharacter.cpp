@@ -10,6 +10,7 @@
 #include "Components/SGCharacterMovementComponent.h"
 #include "Components/SGHealthComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Components/SGWeaponComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseCharacter, All, All);
 
@@ -32,6 +33,9 @@ ASGBaseCharacter::ASGBaseCharacter(const FObjectInitializer& ObjInit)
 
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
     HealthTextComponent->SetupAttachment(GetRootComponent());
+
+    WeaponComponent = CreateDefaultSubobject<USGWeaponComponent>("WeaponComponent");
+    check(WeaponComponent);
 }
 
 // Called when the game starts or when spawned
@@ -47,6 +51,8 @@ void ASGBaseCharacter::BeginPlay()
 
     HealthComponent->OnDeath.AddUObject(this, &ASGBaseCharacter::OnDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &ASGBaseCharacter::OnHealthChanged);
+
+    LandedDelegate.AddDynamic(this, &ASGBaseCharacter::OnGroundLanded);
 }
 
 bool ASGBaseCharacter::IsRunning() const
@@ -77,19 +83,17 @@ void ASGBaseCharacter::Tick(float DeltaTime)
 void ASGBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (!PlayerInputComponent)
-	{
-        return;
-	}
+    check(PlayerInputComponent);
+    check(WeaponComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASGBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ASGBaseCharacter::MoveRight);
     PlayerInputComponent->BindAxis("LookUp", this, &ASGBaseCharacter::AddControllerPitchInput);
     PlayerInputComponent->BindAxis("TurnAround", this, &ASGBaseCharacter::AddControllerYawInput);
-    PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ASGBaseCharacter::Jump);
-    PlayerInputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &ASGBaseCharacter::StartRun);
-    PlayerInputComponent->BindAction("Run", EInputEvent::IE_Released, this, &ASGBaseCharacter::StopRun);
+    PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASGBaseCharacter::Jump);
+    PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASGBaseCharacter::StartRun);
+    PlayerInputComponent->BindAction("Run", IE_Released, this, &ASGBaseCharacter::StopRun);
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USGWeaponComponent::Fire);
 }
 
 void ASGBaseCharacter::MoveForward(float Amount)
@@ -122,11 +126,9 @@ void ASGBaseCharacter::StopRun()
 
 void ASGBaseCharacter::OnDeath()
 {
-    UE_LOG(LogBaseCharacter, Display, TEXT("Player %s is dead"), *GetName());
-
     PlayAnimMontage(DeathAnimMontage);
     GetCharacterMovement()->DisableMovement();
-    SetLifeSpan(5.0f);
+    SetLifeSpan(LifeSpanOnDeath);
 
     if (Controller)
     {
@@ -137,4 +139,16 @@ void ASGBaseCharacter::OnDeath()
 void ASGBaseCharacter::OnHealthChanged(float Health)
 {
     HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+}
+
+void ASGBaseCharacter::OnGroundLanded(const FHitResult& Hit)
+{
+    const float FallVelocityZInverted = -GetVelocity().Z;
+    if (FallVelocityZInverted < LandedDamageVelocityRange.X)
+    {
+        return;
+    }
+
+    const float FinalDamage = HealthComponent->GetMaxHealth() * FMath::GetMappedRangeValueClamped(LandedDamageVelocityRange, LandedDamageRange, FallVelocityZInverted);
+    TakeDamage(FinalDamage, FDamageEvent(), nullptr, nullptr);
 }

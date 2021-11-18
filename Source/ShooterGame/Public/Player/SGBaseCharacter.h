@@ -10,6 +10,8 @@ class UCameraComponent;
 class USpringArmComponent;
 class USGHealthComponent;
 class UTextRenderComponent;
+class ASGBaseWeapon;
+class USGWeaponComponent;
 
 UCLASS()
 class SHOOTERGAME_API ASGBaseCharacter : public ACharacter
@@ -20,17 +22,34 @@ public:
 	// Sets default values for this character's properties
 	ASGBaseCharacter(const FObjectInitializer& ObjInit);
 
+    UFUNCTION(BlueprintCallable, Category = "Movement")
+    bool IsRunning() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Movement")
+    float GetMovementDirection() const;
+
     // Called every frame
     virtual void Tick(float DeltaTime) override;
 
     // Called to bind functionality to input
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-    UFUNCTION(BlueprintCallable, Category = "Movement")
-    bool IsRunning() const;
+protected:
+    // Called when the game starts or when spawned
+    virtual void BeginPlay() override;
 
-    UFUNCTION(BlueprintCallable, Category = "Movement")
-    float GetMovementDirection() const;
+private:
+    UFUNCTION()
+    void OnGroundLanded(const FHitResult& Hit);
+
+    void MoveForward(float Amount);
+    void MoveRight(float Amount);
+
+    void StartRun();
+    void StopRun();
+
+    void OnDeath();
+    void OnHealthChanged(float Health);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -45,21 +64,20 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UTextRenderComponent* HealthTextComponent;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    USGWeaponComponent* WeaponComponent;
+
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* DeathAnimMontage;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    UPROPERTY(EditDefaultsOnly, Category = "Damage")
+    float LifeSpanOnDeath = 5.0f;
 
-private:
-    void MoveForward(float Amount);
-    void MoveRight(float Amount);
+    UPROPERTY(EditDefaultsOnly, Category = "Damage")
+    FVector2D LandedDamageVelocityRange = FVector2D(900.0f, 1200.0f);
 
-	void StartRun();
-    void StopRun();
-
-    void OnDeath();
-    void OnHealthChanged(float Health);
+    UPROPERTY(EditDefaultsOnly, Category = "Damage")
+    FVector2D LandedDamageRange = FVector2D(0.1f, 1.0f);
 
 private:
 	bool WantsToRun = false;
