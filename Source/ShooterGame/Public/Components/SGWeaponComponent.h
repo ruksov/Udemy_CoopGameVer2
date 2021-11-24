@@ -16,22 +16,35 @@ class SHOOTERGAME_API USGWeaponComponent : public UActorComponent
 public:	
 	USGWeaponComponent();
 
-    void Fire();
+    void StartFire();
+    void StopFire();
+    void NextWeapon();
 
 protected:
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-    void SpawnWeapon();
+    void SpawnWeapons();
+    void AttachWeaponToSocket(ASGBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
+    void EquipWeapon(int32 WeaponIndex);
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<ASGBaseWeapon> WeaponClass;
+    TArray<TSubclassOf<ASGBaseWeapon>> WeaponClasses;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    FName WeaponAttachPointName = "WeaponSocket";
+    FName WeaponEquipSocketName = "WeaponSocket";
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    FName WeaponArmorySocketName = "ArmorySocket";
 
 private:
     UPROPERTY()
     ASGBaseWeapon* CurrentWeapon = nullptr;
+
+    UPROPERTY()
+    TArray<ASGBaseWeapon*> Weapons;
+
+    int32 CurrenWeaponIndex = 0;
 };

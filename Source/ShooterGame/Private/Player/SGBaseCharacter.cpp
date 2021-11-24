@@ -11,6 +11,7 @@
 #include "Components/SGHealthComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Components/SGWeaponComponent.h"
+#include "Components/CapsuleComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseCharacter, All, All);
 
@@ -93,7 +94,9 @@ void ASGBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASGBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASGBaseCharacter::StartRun);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ASGBaseCharacter::StopRun);
-    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USGWeaponComponent::Fire);
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USGWeaponComponent::StartFire);
+    PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &USGWeaponComponent::StopFire);
+    PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent, &USGWeaponComponent::NextWeapon);
 }
 
 void ASGBaseCharacter::MoveForward(float Amount)
@@ -134,6 +137,8 @@ void ASGBaseCharacter::OnDeath()
     {
         Controller->ChangeState(NAME_Spectating);
     }
+
+    GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
 void ASGBaseCharacter::OnHealthChanged(float Health)
