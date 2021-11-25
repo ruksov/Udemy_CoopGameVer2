@@ -18,8 +18,9 @@ void ASGRifleWeapon::StopFire()
 void ASGRifleWeapon::Fire()
 {
     UWorld* World = GetWorld();
-    if (!World)
+    if (!World || IsAmmoEmpty())
     {
+        StopFire();
         return;
     }
 
@@ -27,6 +28,7 @@ void ASGRifleWeapon::Fire()
     FVector TraceEnd;
     if (!GetShootTraceData(TraceStart, TraceEnd))
     {
+        StopFire();
         return;
     }
 
@@ -42,6 +44,8 @@ void ASGRifleWeapon::Fire()
     {
         DrawDebugLine(World, GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
     }
+
+    DecreaseAmmo();
 }
 
 bool ASGRifleWeapon::GetShootTraceData(FVector& TraceStart, FVector& TraceEnd) const

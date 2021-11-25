@@ -8,26 +8,34 @@
 
 class ASGBaseWeapon;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTERGAME_API USGWeaponComponent : public UActorComponent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-public:	
-	USGWeaponComponent();
+public:
+    USGWeaponComponent();
 
     void StartFire();
     void StopFire();
     void NextWeapon();
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
     void SpawnWeapons();
     void AttachWeaponToSocket(ASGBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
     void EquipWeapon(int32 WeaponIndex);
+
+    void InitAnimations();
+    void PlayAnimMontage(UAnimMontage* Animation);
+    void OnEqiupFinished(USkeletalMeshComponent* MeshComponent);
+    void OnChangeWeapon(USkeletalMeshComponent* MeshComponent);
+
+    bool CanFire() const;
+    bool CanEquip() const;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
@@ -39,6 +47,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponArmorySocketName = "ArmorySocket";
 
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UAnimMontage* EquipAnimMontage;
+
 private:
     UPROPERTY()
     ASGBaseWeapon* CurrentWeapon = nullptr;
@@ -47,4 +58,5 @@ private:
     TArray<ASGBaseWeapon*> Weapons;
 
     int32 CurrenWeaponIndex = 0;
+    bool EquipAnimInProgress = false;
 };

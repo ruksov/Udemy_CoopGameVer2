@@ -12,7 +12,7 @@ void ASGLauncherWeapon::StartFire()
 void ASGLauncherWeapon::Fire()
 {
     UWorld* World = GetWorld();
-    if (!World)
+    if (!World && IsAmmoEmpty())
     {
         return;
     }
@@ -37,4 +37,6 @@ void ASGLauncherWeapon::Fire()
         Projectile->SetOwner(GetOwner());
         Projectile->FinishSpawning(SpawnTransform);
     }
+
+    DecreaseAmmo();
 }

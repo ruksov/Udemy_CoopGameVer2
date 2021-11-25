@@ -9,6 +9,21 @@
 class USkeletalMeshComponent;
 class APlayerController;
 
+USTRUCT(BlueprintType)
+struct FAmmoData
+{
+	GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "0.0"))
+	int32 Bullets;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "0.0", EditCondition = "!Infinite"))
+    int32 Clips;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    bool Infinite;
+};
+
 UCLASS()
 class SHOOTERGAME_API ASGBaseWeapon : public AActor
 {
@@ -32,6 +47,12 @@ protected:
 	FVector GetMuzzleWorldLocation() const;
 	FHitResult MakeShot(const FVector& TraceStart, const FVector& TraceEnd) const;
 
+	void DecreaseAmmo();
+	bool IsAmmoEmpty() const;
+	bool IsClipEmpty() const;
+	void ChangeClip();
+	void LogAmmo();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* WeaponMesh;
@@ -41,4 +62,10 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float ShootMaxDistance = 1500;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	FAmmoData DefaultAmmo { 15, 10, false };
+
+private:
+	FAmmoData CurrentAmmo;
 };

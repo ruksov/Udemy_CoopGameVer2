@@ -21,6 +21,7 @@ void ASGBaseWeapon::BeginPlay()
 	Super::BeginPlay();
 	
 	check(WeaponMesh);
+    CurrentAmmo = DefaultAmmo;
 }
 
 bool ASGBaseWeapon::GetShootTraceData(FVector& TraceStart, FVector& TraceEnd) const
@@ -74,4 +75,43 @@ FHitResult ASGBaseWeapon::MakeShot(const FVector& TraceStart, const FVector& Tra
 	}
 
 	return HitResult;
+}
+
+void ASGBaseWeapon::DecreaseAmmo()
+{
+    --CurrentAmmo.Bullets;
+    LogAmmo();
+
+    if (IsClipEmpty() && !IsAmmoEmpty())
+    {
+        ChangeClip();
+    }
+}
+
+bool ASGBaseWeapon::IsAmmoEmpty() const
+{
+    return !CurrentAmmo.Infinite && CurrentAmmo.Clips == 0 && IsClipEmpty();
+}
+
+bool ASGBaseWeapon::IsClipEmpty() const
+{
+    return CurrentAmmo.Bullets == 0;
+}
+
+void ASGBaseWeapon::ChangeClip()
+{
+    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+    if (!CurrentAmmo.Infinite)
+    {
+        --CurrentAmmo.Clips;
+    }
+    UE_LOG(LogBaseWeapon, Display, TEXT("----- Change Clip -----"));
+}
+
+void ASGBaseWeapon::LogAmmo()
+{
+    FString const AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " / "
+        + (CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips));
+
+    UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
 }
