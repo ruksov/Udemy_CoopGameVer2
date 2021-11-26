@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "SGBaseWeapon.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+
 class USkeletalMeshComponent;
 class APlayerController;
 
@@ -35,6 +37,9 @@ public:
 	virtual void StartFire() {}
 	virtual void StopFire() {}
 
+    void ChangeClip();
+	bool CanReload();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -50,8 +55,10 @@ protected:
 	void DecreaseAmmo();
 	bool IsAmmoEmpty() const;
 	bool IsClipEmpty() const;
-	void ChangeClip();
 	void LogAmmo();
+
+public:
+	FOnClipEmptySignature OnClipEmpty;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")

@@ -6,8 +6,7 @@
 
 void ASGRifleWeapon::StartFire()
 {
-    Fire();
-    GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASGRifleWeapon::Fire, TimeBetwenShots, true);
+    GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASGRifleWeapon::Fire, TimeBetwenShots, true, 0.0f);
 }
 
 void ASGRifleWeapon::StopFire()

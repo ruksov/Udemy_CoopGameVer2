@@ -16,6 +16,28 @@ ASGBaseWeapon::ASGBaseWeapon()
 	SetRootComponent(WeaponMesh);
 }
 
+void ASGBaseWeapon::ChangeClip()
+{
+    if (!CurrentAmmo.Infinite)
+    {
+        if (CurrentAmmo.Clips == 0)
+        {
+            UE_LOG(LogBaseWeapon, Warning, TEXT("No more clips!"));
+            return;
+        }
+
+        --CurrentAmmo.Clips;
+    }
+
+    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+    UE_LOG(LogBaseWeapon, Display, TEXT("----- Change Clip -----"));
+}
+
+bool ASGBaseWeapon::CanReload()
+{
+    return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
+}
+
 void ASGBaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
@@ -79,12 +101,19 @@ FHitResult ASGBaseWeapon::MakeShot(const FVector& TraceStart, const FVector& Tra
 
 void ASGBaseWeapon::DecreaseAmmo()
 {
+    if (CurrentAmmo.Bullets == 0)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("Clip is empty!"));
+        return;
+    }
+
     --CurrentAmmo.Bullets;
     LogAmmo();
 
     if (IsClipEmpty() && !IsAmmoEmpty())
     {
-        ChangeClip();
+        StopFire();
+        OnClipEmpty.Broadcast();
     }
 }
 
@@ -96,16 +125,6 @@ bool ASGBaseWeapon::IsAmmoEmpty() const
 bool ASGBaseWeapon::IsClipEmpty() const
 {
     return CurrentAmmo.Bullets == 0;
-}
-
-void ASGBaseWeapon::ChangeClip()
-{
-    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
-    if (!CurrentAmmo.Infinite)
-    {
-        --CurrentAmmo.Clips;
-    }
-    UE_LOG(LogBaseWeapon, Display, TEXT("----- Change Clip -----"));
 }
 
 void ASGBaseWeapon::LogAmmo()

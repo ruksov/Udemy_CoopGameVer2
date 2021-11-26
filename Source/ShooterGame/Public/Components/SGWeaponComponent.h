@@ -8,6 +8,18 @@
 
 class ASGBaseWeapon;
 
+USTRUCT(BlueprintType)
+struct FWeaponData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    TSubclassOf<ASGBaseWeapon> WeaponClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    UAnimMontage* ReloadAnimMontage;
+};
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTERGAME_API USGWeaponComponent : public UActorComponent
 {
@@ -19,6 +31,7 @@ public:
     void StartFire();
     void StopFire();
     void NextWeapon();
+    void Reload();
 
 protected:
     virtual void BeginPlay() override;
@@ -33,13 +46,49 @@ private:
     void PlayAnimMontage(UAnimMontage* Animation);
     void OnEqiupFinished(USkeletalMeshComponent* MeshComponent);
     void OnChangeWeapon(USkeletalMeshComponent* MeshComponent);
+    void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
 
     bool CanFire() const;
     bool CanEquip() const;
+    bool CanReload() const;
+
+    void OnClipEmpty();
+    void ChangeClip();
+
+    template<typename T>
+    T* FindAnimNotifyByClass(UAnimSequenceBase* Animation)
+    {
+        if (Animation)
+        {
+            TArray<FAnimNotifyEvent>& NotifyEvents = Animation->Notifies;
+            for (FAnimNotifyEvent& NotifyEvent : NotifyEvents)
+            {
+                if (auto AnimNotify = Cast<T>(NotifyEvent.Notify))
+                {
+                    return AnimNotify;
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    template <typename NotifyClass, typename ClassType, typename FuncType>
+    bool AddCallbackToAnimNotifyByClass(
+        UAnimSequenceBase* Animation, 
+        ClassType* ObjectPtr,
+        FuncType Func)
+    {
+        if (NotifyClass* AnimNotify = FindAnimNotifyByClass<NotifyClass>(Animation))
+        {
+            AnimNotify->OnNotified.AddUObject(ObjectPtr, Func);
+            return true;
+        }
+        return false;
+    }
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TArray<TSubclassOf<ASGBaseWeapon>> WeaponClasses;
+    TArray<FWeaponData> WeaponDatas;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponEquipSocketName = "WeaponSocket";
@@ -57,6 +106,10 @@ private:
     UPROPERTY()
     TArray<ASGBaseWeapon*> Weapons;
 
+    UPROPERTY()
+    UAnimMontage* CurrentReloadAnimMontage = nullptr;
+
     int32 CurrenWeaponIndex = 0;
     bool EquipAnimInProgress = false;
+    bool ReloadAnimInProgress = false;
 };
