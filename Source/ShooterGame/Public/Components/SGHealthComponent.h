@@ -35,8 +35,11 @@ class SHOOTERGAME_API USGHealthComponent : public UActorComponent
 public:	
 	USGHealthComponent();
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "Health")
     bool IsDead() const { return Health <= 0.0f; }
+
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    float GetHealthRatio() const { return Health / MaxHealth; }
 
 	float GetHealth() const { return Health; }
     float GetMaxHealth() const { return MaxHealth; }

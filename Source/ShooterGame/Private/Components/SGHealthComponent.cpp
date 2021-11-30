@@ -15,6 +15,8 @@ USGHealthComponent::USGHealthComponent()
 void USGHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+    check(MaxHealth > 0.0f);
 	
 	SetHealth(MaxHealth);
 

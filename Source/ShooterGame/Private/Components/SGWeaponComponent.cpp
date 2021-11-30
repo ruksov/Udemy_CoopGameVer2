@@ -52,6 +52,28 @@ void USGWeaponComponent::Reload()
     ChangeClip();
 }
 
+bool USGWeaponComponent::GetCurrentWeaponUIData(FWeaponUIData& UIData) const
+{
+    if (!CurrentWeapon)
+    {
+        return false;
+    }
+
+    UIData = CurrentWeapon->GetUIData();
+    return true;
+}
+
+bool USGWeaponComponent::GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const
+{
+    if (!CurrentWeapon)
+    {
+        return false;
+    }
+
+    AmmoData = CurrentWeapon->GetAmmoData();
+    return true;
+}
+
 void USGWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();

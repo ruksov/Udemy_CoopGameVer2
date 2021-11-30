@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "SGCoreTypes.h"
 #include "SGWeaponComponent.generated.h"
 
 class ASGBaseWeapon;
@@ -32,6 +33,9 @@ public:
     void StopFire();
     void NextWeapon();
     void Reload();
+
+    bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
+    bool GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const;
 
 protected:
     virtual void BeginPlay() override;

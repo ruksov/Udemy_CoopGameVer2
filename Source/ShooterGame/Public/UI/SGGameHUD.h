@@ -6,6 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "SGGameHUD.generated.h"
 
+class UUserWidget;
+
 /**
  * 
  */
@@ -17,6 +19,13 @@ class SHOOTERGAME_API ASGGameHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
+protected:
+	virtual void BeginPlay() override;
+
 private:
 	void DrawCrossHair();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
 };

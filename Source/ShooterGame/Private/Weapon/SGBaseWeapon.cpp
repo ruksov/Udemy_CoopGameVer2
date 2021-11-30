@@ -108,7 +108,6 @@ void ASGBaseWeapon::DecreaseAmmo()
     }
 
     --CurrentAmmo.Bullets;
-    LogAmmo();
 
     if (IsClipEmpty() && !IsAmmoEmpty())
     {
