@@ -56,7 +56,7 @@ void USGWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    check(WeaponDatas.Num() == 2, TEXT("Our character can hold only 2 weapons items"))
+    checkf(WeaponDatas.Num() == 2, TEXT("Our character can hold only 2 weapons items"))
 
     CurrenWeaponIndex = 0;
     SpawnWeapons();
@@ -163,7 +163,7 @@ void USGWeaponComponent::InitAnimations()
         isAllAnimNotifiesSet |= AddCallbackToAnimNotifyByClass<USGReloadFinishedAnimNotify>(WeaponData.ReloadAnimMontage, this, &USGWeaponComponent::OnReloadFinished);
     }
 
-    check(isAllAnimNotifiesSet, TEXT("Some of animation notifies falied to set!"));
+    checkf(isAllAnimNotifiesSet, TEXT("Some of animation notifies falied to set!"));
 }
 
 void USGWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
