@@ -74,6 +74,14 @@ bool USGWeaponComponent::GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const
     return true;
 }
 
+bool USGWeaponComponent::TryAddAmmo(TSubclassOf<ASGBaseWeapon> WeaponType, int32 ClipsAmount)
+{
+    ASGBaseWeapon** WeaponIt = Weapons.FindByPredicate([WeaponType](const ASGBaseWeapon* Weapon) { return Weapon && Weapon->IsA(WeaponType); });
+
+    ASGBaseWeapon* Weapon = WeaponIt ? *WeaponIt : nullptr;
+    return Weapon && Weapon->TryAddAmmo(ClipsAmount);
+}
+
 void USGWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
@@ -248,9 +256,21 @@ bool USGWeaponComponent::CanReload() const
     return CurrentWeapon && CurrentWeapon->CanReload() && !EquipAnimInProgress && !ReloadAnimInProgress;
 }
 
-void USGWeaponComponent::OnClipEmpty()
+void USGWeaponComponent::OnClipEmpty(ASGBaseWeapon* Weapon)
 {
-    ChangeClip();
+    if (!Weapon)
+    {
+        return;
+    }
+
+    if (Weapon == CurrentWeapon)
+    {
+        ChangeClip();
+    }
+    else if (Weapons.Contains(Weapon))
+    {
+        Weapon->ChangeClip();
+    }
 }
 
 void USGWeaponComponent::ChangeClip()

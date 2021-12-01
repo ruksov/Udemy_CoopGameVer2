@@ -7,7 +7,7 @@
 #include "SGCoreTypes.h"
 #include "SGBaseWeapon.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature, ASGBaseWeapon*);
 
 class USkeletalMeshComponent;
 class APlayerController;
@@ -29,6 +29,8 @@ public:
 	FWeaponUIData const& GetUIData() const { return UIData; }
 	FAmmoData const& GetAmmoData() const { return CurrentAmmo; }
 
+    bool TryAddAmmo(int32 ClipsAmount);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -44,6 +46,7 @@ protected:
 	void DecreaseAmmo();
 	bool IsAmmoEmpty() const;
 	bool IsClipEmpty() const;
+	bool IsAmmoFull() const;
 	void LogAmmo();
 
 public:

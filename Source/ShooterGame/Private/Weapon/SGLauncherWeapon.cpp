@@ -12,7 +12,7 @@ void ASGLauncherWeapon::StartFire()
 void ASGLauncherWeapon::Fire()
 {
     UWorld* World = GetWorld();
-    if (!World && IsAmmoEmpty())
+    if (!World || IsAmmoEmpty())
     {
         return;
     }

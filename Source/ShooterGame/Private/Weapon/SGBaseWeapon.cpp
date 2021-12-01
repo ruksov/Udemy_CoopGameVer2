@@ -38,6 +38,27 @@ bool ASGBaseWeapon::CanReload()
     return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
 }
 
+bool ASGBaseWeapon::TryAddAmmo(int32 ClipsAmount)
+{
+    if (CurrentAmmo.Infinite || IsAmmoFull() || ClipsAmount <= 0)
+    {
+        return false;
+    }
+
+    const int32 NextClipsAmount = CurrentAmmo.Clips + ClipsAmount;
+    CurrentAmmo.Clips = FMath::Clamp(NextClipsAmount, 0, DefaultAmmo.Clips);
+    
+    if (NextClipsAmount > DefaultAmmo.Clips && CurrentAmmo.Bullets < DefaultAmmo.Bullets)
+    {
+        // Make reload logic.
+        StopFire();
+        ++CurrentAmmo.Clips;
+        OnClipEmpty.Broadcast(this);
+    }
+
+    return true;
+}
+
 void ASGBaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
@@ -112,7 +133,7 @@ void ASGBaseWeapon::DecreaseAmmo()
     if (IsClipEmpty() && !IsAmmoEmpty())
     {
         StopFire();
-        OnClipEmpty.Broadcast();
+        OnClipEmpty.Broadcast(this);
     }
 }
 
@@ -124,6 +145,11 @@ bool ASGBaseWeapon::IsAmmoEmpty() const
 bool ASGBaseWeapon::IsClipEmpty() const
 {
     return CurrentAmmo.Bullets == 0;
+}
+
+bool ASGBaseWeapon::IsAmmoFull() const
+{
+    return CurrentAmmo.Clips == DefaultAmmo.Clips && CurrentAmmo.Bullets == DefaultAmmo.Bullets;
 }
 
 void ASGBaseWeapon::LogAmmo()
