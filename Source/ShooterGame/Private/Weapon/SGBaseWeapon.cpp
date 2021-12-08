@@ -113,6 +113,7 @@ FHitResult ASGBaseWeapon::MakeShot(const FVector& TraceStart, const FVector& Tra
 	{
         FCollisionQueryParams CollisionParams;
         CollisionParams.AddIgnoredActor(GetOwner());
+        CollisionParams.bReturnPhysicalMaterial = true;
 
         World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 	}

@@ -2,8 +2,11 @@
 
 
 #include "Pickups/SGHealthPickup.h"
+#include "SGUtils.h"
+#include "Components/SGHealthComponent.h"
 
 bool ASGHealthPickup::ApplyPickupTo(APawn* Pawn)
 {
-    return true;
+    USGHealthComponent* HealthComponent = SGUtils::GetPlayerComponentByClass<USGHealthComponent>(Pawn);
+    return HealthComponent && HealthComponent->TryAddHealth(HealthAmount);
 }

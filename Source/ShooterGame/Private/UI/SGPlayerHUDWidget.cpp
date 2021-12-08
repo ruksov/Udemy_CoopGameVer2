@@ -6,6 +6,17 @@
 #include "Components/SGWeaponComponent.h"
 #include "SGUtils.h"
 
+bool USGPlayerHUDWidget::Initialize()
+{
+    USGHealthComponent* HealthComponent = SGUtils::GetPlayerComponentByClass<USGHealthComponent>(GetOwningPlayerPawn());
+    if (HealthComponent)
+    {
+        HealthComponent->OnHealthChanged.AddUObject(this, &USGPlayerHUDWidget::OnHealthChanged);
+    }
+
+    return Super::Initialize();
+}
+
 float USGPlayerHUDWidget::GetHealthRatio() const
 {
     const USGHealthComponent* HealthComponent = SGUtils::GetPlayerComponentByClass<USGHealthComponent>(GetOwningPlayerPawn());
@@ -34,4 +45,12 @@ bool USGPlayerHUDWidget::IsPlayerSpectating() const
 {
     const APlayerController* Controller = GetOwningPlayer();
     return Controller && Controller->GetStateName() == NAME_Spectating;
+}
+
+void USGPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
+{
+    if (HealthDelta < 0.0f)
+    {
+        OnTakeDamage();
+    }
 }

@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class USGWeaponFXComponent;
 
 UCLASS()
 class SHOOTERGAME_API ASGProjectile : public AActor
@@ -39,6 +40,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	UProjectileMovementComponent* MovementComponent;
+
+    UPROPERTY(VisibleAnywhere, Category = "VFX")
+    USGWeaponFXComponent* WeaponFXComponent;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float InitCollisionRadius = 5.0f;

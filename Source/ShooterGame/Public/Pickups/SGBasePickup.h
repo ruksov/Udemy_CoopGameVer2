@@ -18,6 +18,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
+
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 private:
@@ -25,6 +27,9 @@ private:
 
     void PickupWasTaken();
     void Respawn();
+
+    void GenerateRotationPeriod();
+    void Rotate(float DeltaSeconds);
 
 protected:
     UPROPERTY(VisibleAnywhere, Category = "Pickup")
@@ -35,4 +40,14 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickup")
     float RespawnTime = 5.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickup")
+    float RotationPeriodMinInSec = 2.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickup")
+    float RotationPeriodMaxInSec = 3.0f;
+
+private:
+    float RotationYaw = 0.0f;
+    float RotationPeriodInSec = 0.0f;
 };

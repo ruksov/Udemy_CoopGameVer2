@@ -17,4 +17,7 @@ class SHOOTERGAME_API ASGHealthPickup : public ASGBasePickup
 private:
     virtual bool ApplyPickupTo(APawn* Pawn) override;
 
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup", meta = (ClampMin = "0.0"))
+    float HealthAmount = 50.0f;
 };

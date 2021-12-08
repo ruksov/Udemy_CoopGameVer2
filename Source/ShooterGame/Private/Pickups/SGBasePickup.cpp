@@ -7,7 +7,7 @@
 // Sets default values
 ASGBasePickup::ASGBasePickup()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
     CollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
     CollisionComponent->InitSphereRadius(InitCollisionRadius);
@@ -21,6 +21,15 @@ void ASGBasePickup::BeginPlay()
 	Super::BeginPlay();
 	
     check(CollisionComponent);
+ 
+    GenerateRotationPeriod();
+}
+
+void ASGBasePickup::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+
+    Rotate(DeltaSeconds);
 }
 
 void ASGBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -50,6 +59,18 @@ void ASGBasePickup::PickupWasTaken()
 
 void ASGBasePickup::Respawn()
 {
+    GenerateRotationPeriod();
     CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
     GetRootComponent()->SetVisibility(true, true);
+}
+
+void ASGBasePickup::GenerateRotationPeriod()
+{
+    RotationPeriodInSec = FMath::RandRange(RotationPeriodMinInSec, RotationPeriodMaxInSec);
+    RotationPeriodInSec *= FMath::RandBool() ? 1.0 : -1.0f;
+}
+
+void ASGBasePickup::Rotate(float DeltaSeconds)
+{
+    AddActorWorldRotation(FRotator(0.0f, (DeltaSeconds / RotationPeriodInSec) * 360.0f, 0.0f));
 }

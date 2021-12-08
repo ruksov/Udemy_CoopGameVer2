@@ -3,6 +3,12 @@
 
 #include "Weapon/SGRifleWeapon.h"
 #include "DrawDebugHelpers.h"
+#include "Weapon/Components/SGWeaponFXComponent.h"
+
+ASGRifleWeapon::ASGRifleWeapon()
+{
+    WeaponFXComponent = CreateDefaultSubobject<USGWeaponFXComponent>("WeaponFXComponent");
+}
 
 void ASGRifleWeapon::StartFire()
 {
@@ -12,6 +18,13 @@ void ASGRifleWeapon::StartFire()
 void ASGRifleWeapon::StopFire()
 {
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
+}
+
+void ASGRifleWeapon::BeginPlay()
+{
+    Super::BeginPlay();
+
+    check(WeaponFXComponent);
 }
 
 void ASGRifleWeapon::Fire()
@@ -36,8 +49,8 @@ void ASGRifleWeapon::Fire()
     if (IsShotHitSomething(HitResult))
     {
         DrawDebugLine(World, GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
-        DrawDebugSphere(World, HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
         HandleHitActor(HitResult);
+        WeaponFXComponent->PlayImpactFX(HitResult);
     }
     else
     {

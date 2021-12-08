@@ -6,6 +6,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Weapon/Components/SGWeaponFXComponent.h"
 
 ASGProjectile::ASGProjectile()
 {
@@ -15,11 +16,14 @@ ASGProjectile::ASGProjectile()
     CollisionComponent->InitSphereRadius(InitCollisionRadius);
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     CollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
+    CollisionComponent->bReturnMaterialOnMove = true;
     SetRootComponent(CollisionComponent);
 
     MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
     MovementComponent->InitialSpeed = 2000.0f;
     MovementComponent->ProjectileGravityScale = 0.0f;
+
+    WeaponFXComponent = CreateDefaultSubobject<USGWeaponFXComponent>("WeaponFXComponent");
 }
 
 void ASGProjectile::BeginPlay()
@@ -28,6 +32,7 @@ void ASGProjectile::BeginPlay()
 
     check(CollisionComponent);
     check(MovementComponent);
+    check(WeaponFXComponent);
 
     MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
     CollisionComponent->IgnoreActorWhenMoving(GetOwner(), true);
@@ -61,6 +66,8 @@ void ASGProjectile::OnProjectileHit(
         DoFullDamage);
 
     DrawDebugSphere(World, GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
+
+    WeaponFXComponent->PlayImpactFX(Hit);
 
     Destroy();
 }
