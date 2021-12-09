@@ -4,6 +4,8 @@
 #include "Weapon/SGRifleWeapon.h"
 #include "DrawDebugHelpers.h"
 #include "Weapon/Components/SGWeaponFXComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 ASGRifleWeapon::ASGRifleWeapon()
 {
@@ -12,12 +14,14 @@ ASGRifleWeapon::ASGRifleWeapon()
 
 void ASGRifleWeapon::StartFire()
 {
+    InitMuzzleFX();
     GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASGRifleWeapon::Fire, TimeBetwenShots, true, 0.0f);
 }
 
 void ASGRifleWeapon::StopFire()
 {
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
+    SetMuzzleFXVisibility(false);
 }
 
 void ASGRifleWeapon::BeginPlay()
@@ -46,17 +50,15 @@ void ASGRifleWeapon::Fire()
 
     FHitResult const HitResult = MakeShot(TraceStart, TraceEnd);
 
+    FVector TraceFXEnd = TraceEnd;
     if (IsShotHitSomething(HitResult))
     {
-        DrawDebugLine(World, GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
+        TraceFXEnd = HitResult.ImpactPoint;
         HandleHitActor(HitResult);
         WeaponFXComponent->PlayImpactFX(HitResult);
     }
-    else
-    {
-        DrawDebugLine(World, GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
-    }
 
+    SpawnTraceFX(GetMuzzleWorldLocation(), TraceFXEnd);
     DecreaseAmmo();
 }
 
@@ -96,4 +98,30 @@ void ASGRifleWeapon::HandleHitActor(const FHitResult& HitResult)
     }
 
     HitActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
+}
+
+void ASGRifleWeapon::InitMuzzleFX()
+{
+    if (!MuzzleFXComponent)
+    {
+        MuzzleFXComponent = SpawnMuzzleFX();
+    }
+    SetMuzzleFXVisibility(true);
+}
+
+void ASGRifleWeapon::SetMuzzleFXVisibility(bool Visible)
+{
+    if (MuzzleFXComponent)
+    {
+        MuzzleFXComponent->SetPaused(!Visible);
+        MuzzleFXComponent->SetVisibility(Visible, true);
+    }
+}
+
+void ASGRifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd)
+{
+    if (UNiagaraComponent* TraceFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), TraceFX, TraceStart))
+    {
+        TraceFXComponent->SetNiagaraVariableVec3(TraceTargetName, TraceEnd);
+    }
 }

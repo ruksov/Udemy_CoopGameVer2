@@ -11,6 +11,8 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature, ASGBaseWeapon*);
 
 class USkeletalMeshComponent;
 class APlayerController;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class SHOOTERGAME_API ASGBaseWeapon : public AActor
@@ -49,6 +51,8 @@ protected:
 	bool IsAmmoFull() const;
 	void LogAmmo();
 
+	UNiagaraComponent* SpawnMuzzleFX() const;
+
 public:
 	FOnClipEmptySignature OnClipEmpty;
 
@@ -67,6 +71,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     FWeaponUIData UIData;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+	UNiagaraSystem* MuzzleFX;
 
 private:
 	FAmmoData CurrentAmmo;

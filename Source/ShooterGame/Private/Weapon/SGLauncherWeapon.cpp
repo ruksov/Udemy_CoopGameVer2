@@ -39,4 +39,5 @@ void ASGLauncherWeapon::Fire()
     }
 
     DecreaseAmmo();
+    SpawnMuzzleFX();
 }
