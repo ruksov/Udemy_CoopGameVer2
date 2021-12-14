@@ -29,7 +29,7 @@ class SHOOTERGAME_API USGWeaponComponent : public UActorComponent
 public:
     USGWeaponComponent();
 
-    void StartFire();
+    virtual void StartFire();
     void StopFire();
     void NextWeapon();
     void Reload();
@@ -43,20 +43,22 @@ protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-private:
-    void SpawnWeapons();
-    void AttachWeaponToSocket(ASGBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
-    void EquipWeapon(int32 WeaponIndex);
-
-    void InitAnimations();
-    void PlayAnimMontage(UAnimMontage* Animation);
-    void OnEqiupFinished(USkeletalMeshComponent* MeshComponent);
-    void OnChangeWeapon(USkeletalMeshComponent* MeshComponent);
-    void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
+    virtual void OnChangeWeapon(USkeletalMeshComponent* MeshComponent);
 
     bool CanFire() const;
     bool CanEquip() const;
     bool CanReload() const;
+
+    void EquipWeapon(int32 WeaponIndex);
+
+private:
+    void SpawnWeapons();
+    void AttachWeaponToSocket(ASGBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
+
+    void InitAnimations();
+    void PlayAnimMontage(UAnimMontage* Animation);
+    void OnEqiupFinished(USkeletalMeshComponent* MeshComponent);
+    void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
 
     void OnClipEmpty(ASGBaseWeapon* Weapon);
     void ChangeClip();
@@ -105,17 +107,18 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* EquipAnimMontage;
 
-private:
     UPROPERTY()
     ASGBaseWeapon* CurrentWeapon = nullptr;
 
     UPROPERTY()
     TArray<ASGBaseWeapon*> Weapons;
 
+    int32 CurrenWeaponIndex = 0;
+
+private:
     UPROPERTY()
     UAnimMontage* CurrentReloadAnimMontage = nullptr;
 
-    int32 CurrenWeaponIndex = 0;
     bool EquipAnimInProgress = false;
     bool ReloadAnimInProgress = false;
 };

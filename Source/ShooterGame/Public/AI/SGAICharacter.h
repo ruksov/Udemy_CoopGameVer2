@@ -16,6 +16,9 @@ class SHOOTERGAME_API ASGAICharacter : public ASGBaseCharacter
 public:
     ASGAICharacter(const FObjectInitializer& ObjInit);
 
+protected:
+    virtual void OnDeath() override;
+
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
 	UBehaviorTree* BehaviorTreeAsset;

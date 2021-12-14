@@ -38,6 +38,8 @@ protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
 
+    virtual void OnDeath();
+
 private:
     UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);
@@ -48,7 +50,6 @@ private:
     void StartRun();
     void StopRun();
 
-    void OnDeath();
     void OnHealthChanged(float Health, float HealthDelta);
 
 protected:

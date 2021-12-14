@@ -7,6 +7,7 @@
 #include "GameFramework/Controller.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Player/SGBaseCharacter.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
@@ -92,13 +93,28 @@ APlayerController* ASGBaseWeapon::GetPlayerController() const
 
 bool ASGBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const
 {
-    const APlayerController* Controller = GetPlayerController();
-    if (!Controller)
+    const ASGBaseCharacter* SGCharacter = Cast<ASGBaseCharacter>(GetOwner());
+    if (!SGCharacter)
     {
         return false;
     }
 
-    Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+    if (SGCharacter->IsPlayerControlled())
+    {
+        const APlayerController* Controller = GetPlayerController();
+        if (!Controller)
+        {
+            return false;
+        }
+
+        Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+    }
+    else
+    {
+        ViewLocation = GetMuzzleWorldLocation();
+        ViewRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
+    }
+
 	return true;
 }
 
