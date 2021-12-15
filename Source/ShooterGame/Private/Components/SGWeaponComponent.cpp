@@ -243,7 +243,7 @@ void USGWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
 
 bool USGWeaponComponent::CanFire() const
 {
-    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress;
+    return CurrentWeapon && !CurrentWeapon->IsAmmoEmpty() && !EquipAnimInProgress && !ReloadAnimInProgress;
 }
 
 bool USGWeaponComponent::CanEquip() const
